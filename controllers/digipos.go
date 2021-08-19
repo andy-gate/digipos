@@ -88,6 +88,54 @@ func GetHistoryPurchaseCronjob() {
 				}
 			}
 		}
+
+		var jsonDataDeposit = []byte(`{
+			"debitParty": "`+ code +`",
+			"startDate": "`+ startDate.Format("2006-01-02 15:04:05") +`",
+			"endDate": "`+ endDate.Format("2006-01-02 15:04:05") +`"
+			
+		}`)
+
+		reqDeposit, _ := http.NewRequest("POST", "https://partner.linkaja.com/apidbx/v1/historyDepositDownload", bytes.NewBuffer(jsonDataDeposit))
+		reqDeposit.Header.Add("Authorization", "Basic ZGlnaXBvczo3SDdOYVQ0eWhEbkR0ekRVNTdVRlA0NEdS")
+		reqDeposit.Header.Add("Content-Type", "application/json")
+		reqDeposit.Header.Add("Accept", "application/octet-stream")
+	
+		respDeposit, error := client.Do(reqDeposit)
+		if error != nil {
+			panic(error)
+		}
+
+		if respDeposit.StatusCode == http.StatusOK {
+			bodyBytes, err := ioutil.ReadAll(respDeposit.Body)
+			if err != nil {
+				fmt.Println(err)
+			}
+			bodyString := string(bodyBytes)
+			results := strings.ReplaceAll(bodyString, "&quot;", " ")
+			reader := csv.NewReader(strings.NewReader(results))
+			reader.Comma = ';'
+			reader.LazyQuotes = true
+			data, err := reader.ReadAll()
+			if err != nil {
+				fmt.Println("error "+ code)
+				// panic(err)
+			}
+
+			for idx, row := range data {
+				// skip header
+				if idx == 0 {
+					continue
+				}
+				
+				amount, _ := strconv.Atoi(strings.TrimSpace(row[7]))
+				addHistoryDeposit := models.HistoryDeposit{LinkAjaNo: strings.TrimSpace(row[0]), InitiationTime: strings.TrimSpace(row[1]), ServiceName: strings.TrimSpace(row[2]), InitiatorParty: strings.TrimSpace(row[3]), CreditParty: strings.TrimSpace(row[4]), DebitParty: strings.TrimSpace(row[5]), TransactionStatus: strings.TrimSpace(row[6]), TransactionAmount: amount, ReceiptNo: strings.TrimSpace(row[8]),}
+				if err := models.MPosGORM.Create(&addHistoryDeposit).Error; err != nil {
+					fmt.Printf("error add History Deposit: %3v \n", err)
+					return
+				}
+			}
+		}
 	}
 }
 

@@ -26,9 +26,8 @@ func main() {
 
   c := cron.New()
 	c.AddFunc("@hourly", func() { 
-    fmt.Println("Cron started: %3v", time.Now())
+    fmt.Printf("Cron started at : %3v \n", time.Now())
     controllers.GetHistoryPurchaseCronjob()
-    controllers.GetHistoryDepositCronjob()
   })
   c.Start()
   
