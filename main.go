@@ -5,7 +5,7 @@ import (
   "fmt"
   "os"
 
-  "github.com/gin-gonic/gin"
+  // "github.com/gin-gonic/gin"
 
   "digipos/controllers"
   "digipos/models"
@@ -21,8 +21,8 @@ func main() {
   defer models.MPosGORM.Close()
 
   // Set the router as the default one shipped with Gin
-  gin.SetMode(gin.ReleaseMode)
-  router := gin.Default()
+  // gin.SetMode(gin.ReleaseMode)
+  // router := gin.Default()
 
   c := cron.New()
 	c.AddFunc("@hourly", func() { 
@@ -31,6 +31,10 @@ func main() {
   })
   c.Start()
   
+  for {
+    time.Sleep(time.Second)
+  }
+
   // Start and run the server
-  router.Run(":4000")
+  // router.Run(":4000")
 }
