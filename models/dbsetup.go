@@ -18,7 +18,7 @@ var err error
 
 func InitGormPostgres() {
 	// MPosGORM, err = gorm.Open("postgres", "user=postgres dbname=digipos password=admin sslmode=disable")
-	MPosGORM, err = gorm.Open("postgres", "user=ubuntu dbname=digipos password=Artaka16 sslmode=disable")
+	MPosGORM, err = gorm.Open("postgres", "user=digipos dbname=digipos password=Artaka16 sslmode=disable")
 	if err != nil {
 		panic(err)
 	}
