@@ -11,6 +11,7 @@ import (
     "strings"
 	"strconv"
 	"time"
+	"sync"
 
 	// "github.com/gin-gonic/gin"
 
@@ -38,105 +39,114 @@ func GetHistoryPurchaseCronjob() {
 
 	client := &http.Client{}
 
-	for _, code := range dealer_code {
-		var jsonData = []byte(`{
-			"creditParty": "`+ code +`",
-			"startDate": "`+ startDate.Format("2006-01-02 15:04:05") +`",
-			"endDate": "`+ endDate.Format("2006-01-02 15:04:05") +`",
-			"serviceName": "10003438"
-		}`)
+	sliceLength := len(dealer_code)
+	var wg sync.WaitGroup
+	wg.Add(sliceLength)
 
-		req, _ := http.NewRequest("POST", "https://partner.linkaja.com/apidbx/v1/historyPurchaseDownload", bytes.NewBuffer(jsonData))
-		req.Header.Add("Authorization", "Basic ZGlnaXBvczo3SDdOYVQ0eWhEbkR0ekRVNTdVRlA0NEdS")
-		req.Header.Add("Content-Type", "application/json")
-		req.Header.Add("Accept", "application/octet-stream")
-	
-		resp, error := client.Do(req)
-		if error != nil {
-			panic(error)
-		}
+	for i := 0; i < sliceLength; i++ {
+		go func(i int) {
+			defer wg.Done()
+			code:=dealer_code[i]
+			var jsonData = []byte(`{
+				"creditParty": "`+ code +`",
+				"startDate": "`+ startDate.Format("2006-01-02 15:04:05") +`",
+				"endDate": "`+ endDate.Format("2006-01-02 15:04:05") +`",
+				"serviceName": "10003438"
+			}`)
 
-		if resp.StatusCode == http.StatusOK {
-			bodyBytes, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				fmt.Println(err)
+			req, _ := http.NewRequest("POST", "https://partner.linkaja.com/apidbx/v1/historyPurchaseDownload", bytes.NewBuffer(jsonData))
+			req.Header.Add("Authorization", "Basic ZGlnaXBvczo3SDdOYVQ0eWhEbkR0ekRVNTdVRlA0NEdS")
+			req.Header.Add("Content-Type", "application/json")
+			req.Header.Add("Accept", "application/octet-stream")
+		
+			resp, error := client.Do(req)
+			if error != nil {
+				panic(error)
 			}
-			bodyString := string(bodyBytes)
-			results := strings.ReplaceAll(bodyString, "&quot;", " ")
-			reader := csv.NewReader(strings.NewReader(results))
-			reader.Comma = ';'
-			reader.LazyQuotes = true
-			data, err := reader.ReadAll()
-			if err != nil {
-				fmt.Println("error "+ code)
-				// panic(err)
+
+			if resp.StatusCode == http.StatusOK {
+				bodyBytes, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					fmt.Println(err)
+				}
+				bodyString := string(bodyBytes)
+				results := strings.ReplaceAll(bodyString, "&quot;", " ")
+				reader := csv.NewReader(strings.NewReader(results))
+				reader.Comma = ';'
+				reader.LazyQuotes = true
+				data, err := reader.ReadAll()
+				if err != nil {
+					fmt.Println("error "+ code)
+					// panic(err)
+				}
+				
+				if data != nil {
+					for idx, row := range data {
+						// skip header
+						if idx == 0 {
+							continue
+						}
+				
+						amount, _ := strconv.Atoi(strings.TrimSpace(row[7]))
+						addHistoryPurchase := models.HistoryPurchase{LinkAjaNo: strings.TrimSpace(row[0]), InitiationTime: strings.TrimSpace(row[1]), ServiceName: strings.TrimSpace(row[2]), InitiatorParty: strings.TrimSpace(row[3]), CreditParty: strings.TrimSpace(row[4]), DebitParty: strings.TrimSpace(row[5]), TransactionStatus: strings.TrimSpace(row[6]), TransactionAmount: amount, ReceiptNo: strings.TrimSpace(row[8]),}
+						if err := models.MPosGORM.Create(&addHistoryPurchase).Error; err != nil {
+							fmt.Printf("error add History Purchase: %3v \n", err)
+							return
+						}
+					}
+				}
 			}
-			
-			if data != nil {
+
+			var jsonDataDeposit = []byte(`{
+				"debitParty": "`+ code +`",
+				"startDate": "`+ startDate.Format("2006-01-02 15:04:05") +`",
+				"endDate": "`+ endDate.Format("2006-01-02 15:04:05") +`"
+				
+			}`)
+
+			reqDeposit, _ := http.NewRequest("POST", "https://partner.linkaja.com/apidbx/v1/historyDepositDownload", bytes.NewBuffer(jsonDataDeposit))
+			reqDeposit.Header.Add("Authorization", "Basic ZGlnaXBvczo3SDdOYVQ0eWhEbkR0ekRVNTdVRlA0NEdS")
+			reqDeposit.Header.Add("Content-Type", "application/json")
+			reqDeposit.Header.Add("Accept", "application/octet-stream")
+		
+			respDeposit, error := client.Do(reqDeposit)
+			if error != nil {
+				panic(error)
+			}
+
+			if respDeposit.StatusCode == http.StatusOK {
+				bodyBytes, err := ioutil.ReadAll(respDeposit.Body)
+				if err != nil {
+					fmt.Println(err)
+				}
+				bodyString := string(bodyBytes)
+				results := strings.ReplaceAll(bodyString, "&quot;", " ")
+				reader := csv.NewReader(strings.NewReader(results))
+				reader.Comma = ';'
+				reader.LazyQuotes = true
+				data, err := reader.ReadAll()
+				if err != nil {
+					fmt.Println("error "+ code)
+					// panic(err)
+				}
+
 				for idx, row := range data {
 					// skip header
 					if idx == 0 {
 						continue
 					}
-			
+					
 					amount, _ := strconv.Atoi(strings.TrimSpace(row[7]))
-					addHistoryPurchase := models.HistoryPurchase{LinkAjaNo: strings.TrimSpace(row[0]), InitiationTime: strings.TrimSpace(row[1]), ServiceName: strings.TrimSpace(row[2]), InitiatorParty: strings.TrimSpace(row[3]), CreditParty: strings.TrimSpace(row[4]), DebitParty: strings.TrimSpace(row[5]), TransactionStatus: strings.TrimSpace(row[6]), TransactionAmount: amount, ReceiptNo: strings.TrimSpace(row[8]),}
-					if err := models.MPosGORM.Create(&addHistoryPurchase).Error; err != nil {
-						fmt.Printf("error add History Purchase: %3v \n", err)
+					addHistoryDeposit := models.HistoryDeposit{LinkAjaNo: strings.TrimSpace(row[0]), InitiationTime: strings.TrimSpace(row[1]), ServiceName: strings.TrimSpace(row[2]), InitiatorParty: strings.TrimSpace(row[3]), CreditParty: strings.TrimSpace(row[4]), DebitParty: strings.TrimSpace(row[5]), TransactionStatus: strings.TrimSpace(row[6]), TransactionAmount: amount, ReceiptNo: strings.TrimSpace(row[8]),}
+					if err := models.MPosGORM.Create(&addHistoryDeposit).Error; err != nil {
+						fmt.Printf("error add History Deposit: %3v \n", err)
 						return
 					}
 				}
-			}
-		}
-
-		var jsonDataDeposit = []byte(`{
-			"debitParty": "`+ code +`",
-			"startDate": "`+ startDate.Format("2006-01-02 15:04:05") +`",
-			"endDate": "`+ endDate.Format("2006-01-02 15:04:05") +`"
-			
-		}`)
-
-		reqDeposit, _ := http.NewRequest("POST", "https://partner.linkaja.com/apidbx/v1/historyDepositDownload", bytes.NewBuffer(jsonDataDeposit))
-		reqDeposit.Header.Add("Authorization", "Basic ZGlnaXBvczo3SDdOYVQ0eWhEbkR0ekRVNTdVRlA0NEdS")
-		reqDeposit.Header.Add("Content-Type", "application/json")
-		reqDeposit.Header.Add("Accept", "application/octet-stream")
-	
-		respDeposit, error := client.Do(reqDeposit)
-		if error != nil {
-			panic(error)
-		}
-
-		if respDeposit.StatusCode == http.StatusOK {
-			bodyBytes, err := ioutil.ReadAll(respDeposit.Body)
-			if err != nil {
-				fmt.Println(err)
-			}
-			bodyString := string(bodyBytes)
-			results := strings.ReplaceAll(bodyString, "&quot;", " ")
-			reader := csv.NewReader(strings.NewReader(results))
-			reader.Comma = ';'
-			reader.LazyQuotes = true
-			data, err := reader.ReadAll()
-			if err != nil {
-				fmt.Println("error "+ code)
-				// panic(err)
-			}
-
-			for idx, row := range data {
-				// skip header
-				if idx == 0 {
-					continue
-				}
-				
-				amount, _ := strconv.Atoi(strings.TrimSpace(row[7]))
-				addHistoryDeposit := models.HistoryDeposit{LinkAjaNo: strings.TrimSpace(row[0]), InitiationTime: strings.TrimSpace(row[1]), ServiceName: strings.TrimSpace(row[2]), InitiatorParty: strings.TrimSpace(row[3]), CreditParty: strings.TrimSpace(row[4]), DebitParty: strings.TrimSpace(row[5]), TransactionStatus: strings.TrimSpace(row[6]), TransactionAmount: amount, ReceiptNo: strings.TrimSpace(row[8]),}
-				if err := models.MPosGORM.Create(&addHistoryDeposit).Error; err != nil {
-					fmt.Printf("error add History Deposit: %3v \n", err)
-					return
-				}
-			}
-		}
+			}		
+		}(i)
 	}
+	wg.Wait()
 }
 
 func GetHistoryDepositCronjob() {
