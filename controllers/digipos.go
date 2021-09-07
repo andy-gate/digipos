@@ -45,7 +45,6 @@ func GetHistoryPurchaseCronjob() {
 
 	for i := 0; i < sliceLength; i++ {
 		go func(i int) {
-			defer wg.Done()
 			code:=dealer_code[i]
 			var jsonData = []byte(`{
 				"creditParty": "`+ code +`",
@@ -143,7 +142,8 @@ func GetHistoryPurchaseCronjob() {
 						return
 					}
 				}
-			}		
+			}	
+			defer wg.Done()	
 		}(i)
 	}
 	wg.Wait()
