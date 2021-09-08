@@ -85,6 +85,10 @@ func GetHistoryPurchaseCronjob() {
 						if idx == 0 {
 							continue
 						}
+						statusTrans := strings.TrimSpace(row[6])
+						if(statusTrans!= "Completed"){
+							continue
+						}
 				
 						amount, _ := strconv.Atoi(strings.TrimSpace(row[7]))
 						addHistoryPurchase := models.HistoryPurchase{LinkAjaNo: strings.TrimSpace(row[0]), InitiationTime: strings.TrimSpace(row[1]), ServiceName: strings.TrimSpace(row[2]), InitiatorParty: strings.TrimSpace(row[3]), CreditParty: strings.TrimSpace(row[4]), DebitParty: strings.TrimSpace(row[5]), TransactionStatus: strings.TrimSpace(row[6]), TransactionAmount: amount, ReceiptNo: strings.TrimSpace(row[8]),}
@@ -132,6 +136,11 @@ func GetHistoryPurchaseCronjob() {
 				for idx, row := range data {
 					// skip header
 					if idx == 0 {
+						continue
+					}
+
+					statusTrans := strings.TrimSpace(row[6])
+					if(statusTrans != "Completed"){
 						continue
 					}
 					
