@@ -100,6 +100,60 @@ func GetHistoryPurchaseCronjob() {
 				}
 			}
 
+			var jsonDataOuter = []byte(`{
+				"creditParty": "`+ code +`",
+				"startDate": "`+ startDate.Format("2006-01-02 15:04:05") +`",
+				"endDate": "`+ endDate.Format("2006-01-02 15:04:05") +`",
+				"serviceName": "10003465"
+			}`)
+
+			req, _ := http.NewRequest("POST", "https://partner.linkaja.com/apidbx/v1/historyPurchaseDownload", bytes.NewBuffer(jsonDataOuter))
+			req.Header.Add("Authorization", "Basic ZGlnaXBvczo3SDdOYVQ0eWhEbkR0ekRVNTdVRlA0NEdS")
+			req.Header.Add("Content-Type", "application/json")
+			req.Header.Add("Accept", "application/octet-stream")
+		
+			resp, error := client.Do(req)
+			if error != nil {
+				panic(error)
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				bodyBytes, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					fmt.Println(err)
+				}
+				bodyString := string(bodyBytes)
+				results := strings.ReplaceAll(bodyString, "&quot;", " ")
+				reader := csv.NewReader(strings.NewReader(results))
+				reader.Comma = ';'
+				reader.LazyQuotes = true
+				data, err := reader.ReadAll()
+				if err != nil {
+					fmt.Println("error "+ code)
+					// panic(err)
+				}
+				
+				if data != nil {
+					for idx, row := range data {
+						// skip header
+						if idx == 0 {
+							continue
+						}
+						statusTrans := strings.TrimSpace(row[6])
+						if(statusTrans!= "Completed"){
+							continue
+						}
+				
+						amount, _ := strconv.Atoi(strings.TrimSpace(row[7]))
+						addHistoryPurchase := models.HistoryPurchase{LinkAjaNo: strings.TrimSpace(row[0]), InitiationTime: strings.TrimSpace(row[1]), ServiceName: strings.TrimSpace(row[2]), InitiatorParty: strings.TrimSpace(row[3]), CreditParty: strings.TrimSpace(row[4]), DebitParty: strings.TrimSpace(row[5]), TransactionStatus: strings.TrimSpace(row[6]), TransactionAmount: amount, ReceiptNo: strings.TrimSpace(row[8]),}
+						if err := models.MPosGORM.Create(&addHistoryPurchase).Error; err != nil {
+							fmt.Printf("error add History Purchase: %3v \n", err)
+							return
+						}
+					}
+				}
+			}
+
 			var jsonDataDeposit = []byte(`{
 				"debitParty": "`+ code +`",
 				"startDate": "`+ startDate.Format("2006-01-02 15:04:05") +`",
