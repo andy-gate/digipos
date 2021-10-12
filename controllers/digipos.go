@@ -107,18 +107,18 @@ func GetHistoryPurchaseCronjob() {
 				"serviceName": "10003465"
 			}`)
 
-			req, _ := http.NewRequest("POST", "https://partner.linkaja.com/apidbx/v1/historyPurchaseDownload", bytes.NewBuffer(jsonDataOuter))
-			req.Header.Add("Authorization", "Basic ZGlnaXBvczo3SDdOYVQ0eWhEbkR0ekRVNTdVRlA0NEdS")
-			req.Header.Add("Content-Type", "application/json")
-			req.Header.Add("Accept", "application/octet-stream")
+			req2, _ := http.NewRequest("POST", "https://partner.linkaja.com/apidbx/v1/historyPurchaseDownload", bytes.NewBuffer(jsonDataOuter))
+			req2.Header.Add("Authorization", "Basic ZGlnaXBvczo3SDdOYVQ0eWhEbkR0ekRVNTdVRlA0NEdS")
+			req2.Header.Add("Content-Type", "application/json")
+			req2.Header.Add("Accept", "application/octet-stream")
 		
-			resp, error := client.Do(req)
+			resp2, error := client.Do(req2)
 			if error != nil {
 				panic(error)
 			}
 
-			if resp.StatusCode == http.StatusOK {
-				bodyBytes, err := ioutil.ReadAll(resp.Body)
+			if resp2.StatusCode == http.StatusOK {
+				bodyBytes, err := ioutil.ReadAll(resp2.Body)
 				if err != nil {
 					fmt.Println(err)
 				}
