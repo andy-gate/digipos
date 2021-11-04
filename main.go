@@ -23,11 +23,12 @@ func main() {
   // Set the router as the default one shipped with Gin
   // gin.SetMode(gin.ReleaseMode)
   // router := gin.Default()
+  // controllers.GetHistoryPurchaseCronjobES()
 
   c := cron.New()
 	c.AddFunc("@hourly", func() { 
     fmt.Printf("Cron started at : %3v \n", time.Now())
-    controllers.GetHistoryPurchaseCronjob()
+    controllers.GetHistoryPurchaseCronjobES()
   })
   c.Start()
   
