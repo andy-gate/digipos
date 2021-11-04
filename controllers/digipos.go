@@ -75,7 +75,6 @@ func GetHistoryPurchaseCronjobES() {
     			if err := json.Unmarshal(bodyBytes, &result); err != nil {  // Parse []byte to the go struct pointer
         			fmt.Println("Can not unmarshal JSON")
     			}
-				fmt.Println(result.Message + " inner " + code)
 
 				for _, rec := range result.Data {
 					var jsonDataRes = []byte(`{
@@ -130,7 +129,6 @@ func GetHistoryPurchaseCronjobES() {
     			if err := json.Unmarshal(bodyBytes2, &result2); err != nil {  // Parse []byte to the go struct pointer
         			fmt.Println("Can not unmarshal JSON")
     			}
-				fmt.Println(result2.Message + " outer " + code)
 
 				for _, rec := range result2.Data {
 					var jsonDataRes2 = []byte(`{
@@ -184,7 +182,6 @@ func GetHistoryPurchaseCronjobES() {
     			if err := json.Unmarshal(bodyBytes3, &result3); err != nil {  // Parse []byte to the go struct pointer
         			fmt.Println("Can not unmarshal JSON")
     			}
-				fmt.Println(result3.Message + " deposit " + code)
 
 				for _, rec := range result3.Data {
 					var jsonDataRes3 = []byte(`{
