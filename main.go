@@ -8,7 +8,7 @@ import (
   // "github.com/gin-gonic/gin"
 
   "digipos/controllers"
-  "digipos/models"
+  // "digipos/models"
   "github.com/robfig/cron"
 
 )
@@ -17,8 +17,8 @@ func main() {
   os.Setenv("TZ", "Asia/Jakarta")
   fmt.Printf("Started at : %3v \n", time.Now())
 
-  models.InitGormPostgres()
-  defer models.MPosGORM.Close()
+  // models.InitGormPostgres()
+  // defer models.MPosGORM.Close()
 
   // Set the router as the default one shipped with Gin
   // gin.SetMode(gin.ReleaseMode)
