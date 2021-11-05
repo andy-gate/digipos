@@ -40,11 +40,11 @@ func GetHistoryPurchaseCronjobES() {
 	client := &http.Client{}
 
 	sliceLength := len(dealer_code)
-	var wg sync.WaitGroup
-	wg.Add(sliceLength)
+	// var wg sync.WaitGroup
+	// wg.Add(sliceLength)
 
 	for i := 0; i < sliceLength; i++ {
-		go func(i int) {
+		// go func(i int) {
 			code:=dealer_code[i]
 			var jsonData = []byte(`{
 				"creditParty": "`+ code +`",
@@ -100,10 +100,10 @@ func GetHistoryPurchaseCronjobES() {
 				}
 			}
 
-			defer wg.Done()	
-		}(i)
+			// defer wg.Done()	
+		// }(i)
 	}
-	wg.Wait()
+	// wg.Wait()
 }
 
 func GetHistoryPurchaseCronjobES2() {
@@ -128,11 +128,11 @@ func GetHistoryPurchaseCronjobES2() {
 	client := &http.Client{}
 
 	sliceLength := len(dealer_code)
-	var wg sync.WaitGroup
-	wg.Add(sliceLength)
+	// var wg sync.WaitGroup
+	// wg.Add(sliceLength)
 
 	for i := 0; i < sliceLength; i++ {
-		go func(i int) {
+		// go func(i int) {
 			code:=dealer_code[i]
 			var jsonData2 = []byte(`{
 				"creditParty": "`+ code +`",
@@ -188,10 +188,10 @@ func GetHistoryPurchaseCronjobES2() {
 				}
 			}
 
-			defer wg.Done()	
-		}(i)
+		// 	defer wg.Done()	
+		// }(i)
 	}
-	wg.Wait()
+	// wg.Wait()
 }
 
 func GetHistoryPurchaseCronjobES3() {
@@ -216,11 +216,11 @@ func GetHistoryPurchaseCronjobES3() {
 	client := &http.Client{}
 
 	sliceLength := len(dealer_code)
-	var wg sync.WaitGroup
-	wg.Add(sliceLength)
+	// var wg sync.WaitGroup
+	// wg.Add(sliceLength)
 
 	for i := 0; i < sliceLength; i++ {
-		go func(i int) {
+		// go func(i int) {
 			code:=dealer_code[i]
 			var jsonData3 = []byte(`{
 				"debitParty": "`+ code +`",
@@ -275,10 +275,10 @@ func GetHistoryPurchaseCronjobES3() {
 				}
 			}
 
-			defer wg.Done()	
-		}(i)
+		// 	defer wg.Done()	
+		// }(i)
 	}
-	wg.Wait()
+	// wg.Wait()
 }
 
 func GetHistoryPurchaseCronjob() {
