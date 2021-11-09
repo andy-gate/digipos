@@ -23,7 +23,7 @@ func main() {
   // Set the router as the default one shipped with Gin
   // gin.SetMode(gin.ReleaseMode)
   // router := gin.Default()
-  // controllers.GetHistoryPurchaseCronjobES()
+  // controllers.GetHistoryPurchaseCronjobES2()
 
   c := cron.New()
 	c.AddFunc("@hourly", func() {
