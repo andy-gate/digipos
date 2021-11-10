@@ -29,10 +29,10 @@ func main() {
 	c.AddFunc("@hourly", func() {
     controllers.GetHistoryPurchaseCronjobES()
   })
-  c.AddFunc("20 * * * *", func() { 
+  c.AddFunc("0 20 * * * *", func() {
     controllers.GetHistoryPurchaseCronjobES2()
   })
-  c.AddFunc("40 * * * *", func() { 
+  c.AddFunc("0 40 * * * *", func() {
     controllers.GetHistoryPurchaseCronjobES3()
   })
   c.Start()
