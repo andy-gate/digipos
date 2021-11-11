@@ -8,7 +8,6 @@ import (
   // "github.com/gin-gonic/gin"
 
   "digipos/controllers"
-  // "digipos/models"
   "github.com/robfig/cron"
 
 )
@@ -17,23 +16,20 @@ func main() {
   os.Setenv("TZ", "Asia/Jakarta")
   fmt.Printf("Started at : %3v \n", time.Now())
 
-  // models.InitGormPostgres()
-  // defer models.MPosGORM.Close()
-
   // Set the router as the default one shipped with Gin
   // gin.SetMode(gin.ReleaseMode)
   // router := gin.Default()
-  // controllers.GetHistoryPurchaseCronjobES()
+  controllers.GetHistoryPurchaseCronjobES()
 
   c := cron.New()
 	c.AddFunc("@hourly", func() {
-    controllers.GetHistoryPurchaseCronjobES()
+    // controllers.GetHistoryPurchaseCronjobES()
   })
   c.AddFunc("0 20 * * * *", func() {
-    controllers.GetHistoryPurchaseCronjobES2()
+    // controllers.GetHistoryPurchaseCronjobES2()
   })
   c.AddFunc("0 40 * * * *", func() {
-    controllers.GetHistoryPurchaseCronjobES3()
+    // controllers.GetHistoryPurchaseCronjobES3()
   })
   c.Start()
   
