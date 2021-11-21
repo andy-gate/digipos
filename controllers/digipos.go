@@ -8,7 +8,7 @@ import (
 	// "encoding/csv"
 	"encoding/json"
 	"io/ioutil"
-    // "strings"
+    "strings"
 	"strconv"
 	"time"
 	"sync"
@@ -41,11 +41,11 @@ func GetHistoryPurchaseCronjobES() {
 	client := &http.Client{}
 
 	sliceLength := len(dealer_code)
-	// var wg sync.WaitGroup
-	// wg.Add(sliceLength)
+	var wg sync.WaitGroup
+	wg.Add(sliceLength)
 
 	for i := 0; i < sliceLength; i++ {
-		// go func(i int) {
+		go func(i int) {
 			code:=dealer_code[i]
 			var jsonData = []byte(`{
 				"creditParty": "`+ code +`",
@@ -77,23 +77,19 @@ func GetHistoryPurchaseCronjobES() {
         			fmt.Println("Can not unmarshal JSON")
     			}
 
-				for _, rec := range result.Data {
-					var jsonDataRes = []byte(`{
-						"link_aja_no":  "`+ rec.LinkAjaNo +`",
-						"initiation_time": "`+ rec.InitiationTime +`",
-						"service_name": "`+ rec.ServiceName +`",
-						"initiator_party": "`+ rec.InitiatorParty +`",
-						"credit_party": "`+ rec.CreditParty +`",
-						"debit_party": "`+ rec.DebitParty +`",
-						"transaction_status": "`+ rec.TransactionStatus +`",
-						"transaction_amount": `+ strconv.Itoa(rec.TransactionAmount) +`,
-						"receipt_no": "`+ rec.ReceiptNo +`",
-						"transaction_flag": "`+ rec.TransactionFlag +`"
-					}`)
+				var metrics bytes.Buffer
 
-					reqRes, _ := http.NewRequest("POST", "http://localhost:9200/digipos/history_purchases/", bytes.NewBuffer(jsonDataRes))
-					reqRes.Header.Add("Content-Type", "application/json")
-				
+				if result.Data != nil {
+
+					for _, rec := range result.Data {
+						metrics.WriteString(`{ "index":{} }`)
+						metrics.WriteString("\n")
+						metrics.WriteString(`{ "link_aja_no":  "`+ rec.LinkAjaNo +`", "initiation_time": "`+ strings.ReplaceAll(rec.InitiationTime, " ", "T") +`", "service_name": "`+ rec.ServiceName +`", "initiator_party": "`+ rec.InitiatorParty +`", "credit_party": "`+ rec.CreditParty +`", "debit_party": "`+ rec.DebitParty +`", "transaction_status": "`+ rec.TransactionStatus +`", "transaction_amount": `+ strconv.Itoa(rec.TransactionAmount) +`, "receipt_no": "`+ rec.ReceiptNo +`", "transaction_flag": "`+ rec.TransactionFlag +`" }`)
+						metrics.WriteString("\n")
+					}
+					reqRes, _ := http.NewRequest("POST", "http://localhost:9200/digipos/history_purchases/_bulk", bytes.NewBufferString(metrics.String()))
+					reqRes.Header.Add("Content-Type", "application/x-ndjson")
+					
 					_, error := client.Do(reqRes)
 					if error != nil {
 						panic(error)
@@ -101,10 +97,10 @@ func GetHistoryPurchaseCronjobES() {
 				}
 			}
 
-		// 	defer wg.Done()
-		// }(i)
+			defer wg.Done()
+		}(i)
 	}
-	// wg.Wait()
+	wg.Wait()
 }
 
 func GetHistoryPurchaseCronjobES2() {
@@ -165,24 +161,20 @@ func GetHistoryPurchaseCronjobES2() {
         			fmt.Println("Can not unmarshal JSON")
     			}
 
-				for _, rec := range result2.Data {
-					var jsonDataRes2 = []byte(`{
-						"link_aja_no":  "`+ rec.LinkAjaNo +`",
-						"initiation_time": "`+ rec.InitiationTime +`",
-						"service_name": "`+ rec.ServiceName +`",
-						"initiator_party": "`+ rec.InitiatorParty +`",
-						"credit_party": "`+ rec.CreditParty +`",
-						"debit_party": "`+ rec.DebitParty +`",
-						"transaction_status": "`+ rec.TransactionStatus +`",
-						"transaction_amount": `+ strconv.Itoa(rec.TransactionAmount) +`,
-						"receipt_no": "`+ rec.ReceiptNo +`",
-						"transaction_flag": "`+ rec.TransactionFlag +`"
-					}`)
+				var metrics bytes.Buffer
 
-					reqRes2, _ := http.NewRequest("POST", "http://localhost:9200/digipos/history_purchases/", bytes.NewBuffer(jsonDataRes2))
-					reqRes2.Header.Add("Content-Type", "application/json")
-				
-					_, error := client.Do(reqRes2)
+				if result2.Data != nil {
+
+					for _, rec := range result2.Data {
+						metrics.WriteString(`{ "index":{} }`)
+						metrics.WriteString("\n")
+						metrics.WriteString(`{ "link_aja_no":  "`+ rec.LinkAjaNo +`", "initiation_time": "`+ strings.ReplaceAll(rec.InitiationTime, " ", "T") +`", "service_name": "`+ rec.ServiceName +`", "initiator_party": "`+ rec.InitiatorParty +`", "credit_party": "`+ rec.CreditParty +`", "debit_party": "`+ rec.DebitParty +`", "transaction_status": "`+ rec.TransactionStatus +`", "transaction_amount": `+ strconv.Itoa(rec.TransactionAmount) +`, "receipt_no": "`+ rec.ReceiptNo +`", "transaction_flag": "`+ rec.TransactionFlag +`" }`)
+						metrics.WriteString("\n")
+					}
+					 reqRes, _ := http.NewRequest("POST", "http://localhost:9200/digipos/history_purchases/_bulk", bytes.NewBufferString(metrics.String()))
+					reqRes.Header.Add("Content-Type", "application/x-ndjson")
+					
+					_, error := client.Do(reqRes)
 					if error != nil {
 						panic(error)
 					}
@@ -252,24 +244,20 @@ func GetHistoryPurchaseCronjobES3() {
         			fmt.Println("Can not unmarshal JSON")
     			}
 
-				for _, rec := range result3.Data {
-					var jsonDataRes3 = []byte(`{
-						"link_aja_no":  "`+ rec.LinkAjaNo +`",
-						"initiation_time": "`+ rec.InitiationTime +`",
-						"service_name": "`+ rec.ServiceName +`",
-						"initiator_party": "`+ rec.InitiatorParty +`",
-						"credit_party": "`+ rec.CreditParty +`",
-						"debit_party": "`+ rec.DebitParty +`",
-						"transaction_status": "`+ rec.TransactionStatus +`",
-						"transaction_amount": `+ strconv.Itoa(rec.TransactionAmount) +`,
-						"receipt_no": "`+ rec.ReceiptNo +`",
-						"transaction_flag": "`+ rec.TransactionFlag +`"
-					}`)
+				var metrics bytes.Buffer
 
-					reqRes3, _ := http.NewRequest("POST", "http://localhost:9200/digipos/history_deposits/", bytes.NewBuffer(jsonDataRes3))
-					reqRes3.Header.Add("Content-Type", "application/json")
-				
-					_, error := client.Do(reqRes3)
+				if result3.Data != nil {
+
+					for _, rec := range result3.Data {
+						metrics.WriteString(`{ "index":{} }`)
+						metrics.WriteString("\n")
+						metrics.WriteString(`{ "link_aja_no":  "`+ rec.LinkAjaNo +`", "initiation_time": "`+ strings.ReplaceAll(rec.InitiationTime, " ", "T") +`", "service_name": "`+ rec.ServiceName +`", "initiator_party": "`+ rec.InitiatorParty +`", "credit_party": "`+ rec.CreditParty +`", "debit_party": "`+ rec.DebitParty +`", "transaction_status": "`+ rec.TransactionStatus +`", "transaction_amount": `+ strconv.Itoa(rec.TransactionAmount) +`, "receipt_no": "`+ rec.ReceiptNo +`", "transaction_flag": "`+ rec.TransactionFlag +`" }`)
+						metrics.WriteString("\n")
+					}
+					reqRes, _ := http.NewRequest("POST", "http://localhost:9200/digipos/history_deposits/_bulk", bytes.NewBufferString(metrics.String()))
+					reqRes.Header.Add("Content-Type", "application/x-ndjson")
+					
+					_, error := client.Do(reqRes)
 					if error != nil {
 						panic(error)
 					}

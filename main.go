@@ -26,10 +26,10 @@ func main() {
     controllers.GetHistoryPurchaseCronjobES()
   })
   c.AddFunc("0 20 * * * *", func() {
-    // controllers.GetHistoryPurchaseCronjobES2()
+    controllers.GetHistoryPurchaseCronjobES2()
   })
   c.AddFunc("0 40 * * * *", func() {
-    // controllers.GetHistoryPurchaseCronjobES3()
+    controllers.GetHistoryPurchaseCronjobES3()
   })
   c.Start()
   
