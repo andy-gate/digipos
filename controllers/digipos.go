@@ -63,6 +63,7 @@ func GetHistoryPurchaseCronjobES() {
 		
 			resp, error := client.Do(req)
 			if error != nil {
+				fmt.Println(resp)
 				panic(error)
 			}
 
@@ -147,6 +148,7 @@ func GetHistoryPurchaseCronjobES2() {
 		
 			resp2, error := client.Do(req2)
 			if error != nil {
+				fmt.Println(resp2)
 				panic(error)
 			}
 
@@ -230,6 +232,7 @@ func GetHistoryPurchaseCronjobES3() {
 		
 			resp3, error := client.Do(req3)
 			if error != nil {
+				fmt.Println(resp3)
 				panic(error)
 			}
 
