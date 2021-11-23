@@ -107,8 +107,8 @@ func GetHistoryPurchaseCronjobES() {
 
 func GetHistoryPurchaseCronjobES2() {
 
-	startDate := time.Now().Add(-2*time.Hour)
-	endDate := time.Now().Add(-1*time.Hour).Add(-1*time.Second)
+	startDate := time.Now().Add(-2*time.Hour).Add(-20*time.Minute)
+	endDate := time.Now().Add(-1*time.Hour).Add(-20*time.Minute).Add(-1*time.Second)
 
 	dealer_code := []string{
 		"11129", "22123", "41149", "12132", "31131", "11133", "11116", "12149", "12120", "13110", 
@@ -193,8 +193,8 @@ func GetHistoryPurchaseCronjobES2() {
 
 func GetHistoryPurchaseCronjobES3() {
 
-	startDate := time.Now().Add(-2*time.Hour)
-	endDate := time.Now().Add(-1*time.Hour).Add(-1*time.Second)
+	startDate := time.Now().Add(-2*time.Hour).Add(-40*time.Minute)
+	endDate := time.Now().Add(-1*time.Hour).Add(-40*time.Minute).Add(-1*time.Second)
 
 	dealer_code := []string{
 		"11129", "22123", "41149", "12132", "31131", "11133", "11116", "12149", "12120", "13110", 
