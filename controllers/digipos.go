@@ -92,12 +92,14 @@ func GetHistoryPurchaseCronjobES() {
 					reqRes, _ := http.NewRequest("POST", "http://localhost:9200/digipos/history_purchases/_bulk", bytes.NewBufferString(metrics.String()))
 					reqRes.Header.Add("Content-Type", "application/x-ndjson")
 					
-					_, error := client.Do(reqRes)
+					tempRes, error := client.Do(reqRes)
 					if error != nil {
 						panic(error)
 					}
+					defer tempRes.Body.Close()
 				}
 			}
+			defer resp.Body.Close()
 
 			defer wg.Done()
 		}(i)
@@ -178,12 +180,14 @@ func GetHistoryPurchaseCronjobES2() {
 					 reqRes, _ := http.NewRequest("POST", "http://localhost:9200/digipos/history_purchases/_bulk", bytes.NewBufferString(metrics.String()))
 					reqRes.Header.Add("Content-Type", "application/x-ndjson")
 					
-					_, error := client.Do(reqRes)
+					tempRes2, error := client.Do(reqRes)
 					if error != nil {
 						panic(error)
 					}
+					defer tempRes2.Body.Close()
 				}
 			}
+			defer resp2.Body.Close()
 
 			defer wg.Done()	
 		}(i)
@@ -263,12 +267,14 @@ func GetHistoryPurchaseCronjobES3() {
 					reqRes, _ := http.NewRequest("POST", "http://localhost:9200/digipos/history_deposits/_bulk", bytes.NewBufferString(metrics.String()))
 					reqRes.Header.Add("Content-Type", "application/x-ndjson")
 					
-					_, error := client.Do(reqRes)
+					tempRes3, error := client.Do(reqRes)
 					if error != nil {
 						panic(error)
 					}
+					defer tempRes3.Body.Close()
 				}
 			}
+			defer resp3.Body.Close()
 
 			defer wg.Done()	
 		}(i)
